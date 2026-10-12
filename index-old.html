@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Finora | Personal Finance</title>
+<style>
+:root{
+  --bg:#f4f6fc;--card:#fff;--text:#192238;--muted:#858da1;
+  --primary:#625bf6;--green:#0ca678;--red:#e85d75;--border:#e8ecf4;
+  --sidebar:#171b2e;--surface-soft:#fafbfe;--input-bg:#fff;
+  --shadow:0 15px 50px #18244a0c;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Segoe UI",Arial,sans-serif;transition:background .2s,color .2s}
+button,input,select{font:inherit}button{cursor:pointer}.hidden{display:none!important}
+body[data-theme="dark"]{
+  color-scheme:dark;--bg:#111522;--card:#1b2132;--text:#edf0fa;--muted:#a1abc0;
+  --border:#30384d;--sidebar:#0c1020;--surface-soft:#20273a;--input-bg:#171d2c;
+  --shadow:0 15px 50px #0003;
+}
+body[data-theme="light"]{color-scheme:light}
+body[data-theme="dark"] header,body[data-theme="dark"] .auth-card,body[data-theme="dark"] .card,
+body[data-theme="dark"] .panel,body[data-theme="dark"] .date-pill,body[data-theme="dark"] .btn.light{
+  background:var(--card);color:var(--text)
+}
+body[data-theme="dark"] .auth-tabs button,body[data-theme="dark"] .field input,
+body[data-theme="dark"] .field select,body[data-theme="dark"] .search,body[data-theme="dark"] .filter{
+  background:var(--input-bg);color:var(--text);border-color:var(--border)
+}
+body[data-theme="dark"] th{background:var(--surface-soft)}
+body[data-theme="dark"] td{border-color:var(--border)}
+body[data-theme="dark"] .field label,body[data-theme="dark"] .chart-name{color:var(--muted)}
+body[data-theme="dark"] .tag{background:#302b55;color:#c4c0ff}
+body[data-theme="dark"] .delete{background:#321e2a;border-color:#5d2d3e}
+body[data-theme="dark"] .budget-progress,body[data-theme="dark"] .track{background:#30384d}
+.auth-wrap{min-height:100vh;display:grid;place-items:center;padding:20px}
+.auth-card{width:100%;max-width:420px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:30px;box-shadow:var(--shadow)}
+.brand{font-size:29px;font-weight:850;letter-spacing:-1px;margin-bottom:7px}.brand span{color:var(--primary)}
+.subtitle{color:var(--muted);font-size:13px;margin-bottom:25px}
+.auth-tabs{display:flex;gap:8px;margin-bottom:22px}
+.auth-tabs button{flex:1;padding:11px;border:1px solid var(--border);background:var(--card);color:var(--text);border-radius:9px}
+.auth-tabs button.active{background:var(--primary);color:white;border-color:var(--primary)}
+.field{margin-bottom:14px}.field label{display:block;font-size:12px;font-weight:650;color:#606a80;margin-bottom:7px}
+.field input,.field select{width:100%;padding:12px;border:1px solid var(--border);border-radius:9px;background:var(--input-bg);color:var(--text);outline:none}
+.field input:focus,.field select:focus{border-color:var(--primary)}
+.btn{border:0;background:var(--primary);color:white;padding:12px 15px;border-radius:9px;font-weight:700}
+.btn.full{width:100%}.btn.green{background:var(--green)}.btn.light{background:var(--card);color:var(--text);border:1px solid var(--border)}
+.btn:disabled{opacity:.6;cursor:wait}.error{font-size:12px;color:var(--red);min-height:18px;margin:10px 0}
+.success{color:var(--green)}.app{min-height:100vh;display:grid;grid-template-columns:225px minmax(0,1fr)}
+aside{background:var(--sidebar);color:white;padding:25px 17px;min-width:0}
+.sidebar-brand{font-size:26px;font-weight:850;margin:0 10px 32px}.sidebar-brand span{color:#a49fff}
+.nav-label{color:#8991aa;font-size:11px;letter-spacing:1px;margin:20px 10px 10px}
+.nav{display:block;width:100%;text-align:left;border:0;background:transparent;color:#c2c7d8;padding:13px 12px;border-radius:9px;margin-bottom:5px}
+.nav:hover,.nav.active{background:var(--primary);color:white}
+main{min-width:0}header{display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--card);padding:19px 28px;border-bottom:1px solid var(--border)}
+header h1{font-size:22px;margin:0}header p{font-size:12px;color:var(--muted);margin:5px 0 0}
+.header-actions{display:flex;align-items:center;gap:10px}.avatar{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:#efedff;color:var(--primary);font-weight:800}
+.content{max-width:1450px;margin:auto;padding:25px 28px}
+.welcome{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
+.welcome h2{font-size:24px;margin:0}.muted{font-size:12px;color:var(--muted);margin-top:6px}
+.date-pill{padding:10px 12px;background:var(--card);border:1px solid var(--border);border-radius:9px;font-size:12px}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:20px}
+.card,.panel{min-width:0;background:var(--card);border:1px solid var(--border);border-radius:15px;padding:20px}
+.stat-label{font-size:12px;color:var(--muted)}.stat-value{font-size:clamp(19px,2vw,28px);font-weight:800;overflow-wrap:anywhere;margin:16px 0 7px}
+.stat-note{font-size:11px;color:var(--muted)}.green-text{color:var(--green)}.red-text{color:var(--red)}.purple-text{color:var(--primary)}
+.columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.panel{margin-bottom:18px}
+.panel-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:18px}
+.panel-head h3{font-size:16px;margin:0}.panel-head p{font-size:12px;color:var(--muted);margin:5px 0 0}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.form-grid .field{margin:0}
+.form-actions{margin-top:14px}.message{font-size:12px;min-height:16px;margin:9px 0 0;color:var(--red)}
+.budget-progress{height:12px;background:#edf0f7;border-radius:20px;overflow:hidden;margin:17px 0}
+.budget-bar{height:100%;width:0;background:var(--green);border-radius:20px;transition:width .25s}.budget-bar.over{background:var(--red)}
+.budget-numbers{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.chart-list{display:grid;gap:17px}.chart-row{display:grid;grid-template-columns:95px minmax(0,1fr) auto;align-items:center;gap:10px;font-size:12px}
+.chart-name{color:#606a80;overflow-wrap:anywhere}.track{height:10px;background:#edf0f7;border-radius:20px;overflow:hidden}
+.bar{height:100%;background:var(--primary);border-radius:20px}.chart-amount{font-weight:700;white-space:nowrap}
+.toolbar{display:flex;gap:8px}.search,.filter{width:100%;max-width:220px;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--input-bg);color:var(--text)}
+.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;text-align:left}
+th{padding:12px;background:var(--surface-soft);color:var(--muted);font-size:10px;text-transform:uppercase}
+td{padding:13px 12px;border-bottom:1px solid var(--border);font-size:12px}tbody tr:last-child td{border-bottom:0}
+.tag{display:inline-block;padding:5px 8px;border-radius:7px;background:#efedff;color:var(--primary);font-size:10px}
+.delete{border:1px solid #ffdee5;background:#fff5f7;color:var(--red);padding:7px 9px;border-radius:7px;font-size:11px}
+.empty{text-align:center;color:var(--muted);padding:24px 10px;font-size:13px}.footer{text-align:center;color:#9ba2b1;font-size:11px;padding:10px}
+.page{display:none;min-width:0;animation:pageFadeIn .2s ease}.page.active{display:block}
+@keyframes pageFadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.settings-card{background:var(--card);border:1px solid var(--border);border-radius:15px;padding:20px;min-width:0}
+.settings-card h3{margin:0 0 6px;font-size:16px}.settings-card .description{font-size:12px;color:var(--muted);margin:0 0 18px;line-height:1.5}
+.setting-row{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid var(--border)}
+.setting-row:last-child{border-bottom:0}.setting-copy{min-width:0}.setting-copy strong{display:block;font-size:13px}
+.setting-copy small{display:block;color:var(--muted);font-size:11px;margin-top:4px;line-height:1.4}
+.setting-control{flex:0 0 auto;max-width:180px}.setting-control select,.setting-control input[type="text"],.setting-control input[type="email"],.setting-control input[type="password"],.setting-control input[type="color"]{
+  max-width:100%;padding:9px;border:1px solid var(--border);border-radius:8px;background:var(--input-bg);color:var(--text)
+}
+.setting-control select{min-width:125px}.setting-control input[type="color"]{width:48px;height:38px;padding:3px}
+.toggle{width:42px;height:24px;appearance:none;background:#c8cede;border-radius:30px;position:relative;cursor:pointer;transition:.2s;flex:0 0 auto}
+.toggle:checked{background:var(--primary)}.toggle:before{content:"";position:absolute;width:18px;height:18px;background:#fff;border-radius:50%;top:3px;left:3px;transition:.2s}
+.toggle:checked:before{left:21px}.settings-form .field{margin-bottom:12px}
+.settings-form .field label{color:var(--muted)}.settings-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.settings-note{font-size:12px;color:var(--muted);line-height:1.5}.settings-status{font-size:12px;min-height:18px;margin-top:10px}
+.account-email{overflow-wrap:anywhere}
+body.compact .content{padding-top:15px;padding-bottom:15px}body.compact .card,body.compact .panel,body.compact .settings-card{padding:14px}
+body.compact .stats{gap:9px;margin-bottom:12px}body.compact .panel{margin-bottom:12px}
+@media(max-width:1100px){.app{grid-template-columns:185px minmax(0,1fr)}.content{padding:20px 17px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.settings-grid{grid-template-columns:1fr}}
+@media(max-width:700px){
+ .app{display:block}aside{padding:14px}.sidebar-brand{margin:0 5px 12px}
+ aside nav{display:flex;gap:6px;overflow-x:auto;padding-bottom:3px}
+ .nav-label{display:none}.nav{flex:0 0 auto;width:auto;padding:10px;font-size:12px;margin:0;white-space:nowrap}
+ header{padding:14px;align-items:flex-start}header h1{font-size:19px}.content{padding:18px 11px}
+ .welcome{align-items:flex-start;flex-direction:column}.welcome h2{font-size:22px}
+ .card{padding:14px}.stat-value{font-size:20px}.columns{grid-template-columns:1fr;gap:0}.panel{padding:15px}
+ .form-grid{grid-template-columns:1fr}.panel-head{align-items:flex-start;flex-direction:column}
+ .toolbar{width:100%;flex-direction:column}.search,.filter{max-width:none}table{min-width:600px}
+ .header-actions{gap:5px;flex-wrap:wrap;justify-content:flex-end}.header-actions .btn{padding:9px;font-size:11px}
+ .avatar{width:34px;height:34px}.settings-card{padding:15px}.setting-row{align-items:flex-start}
+ .setting-control{max-width:48%}.setting-control select{min-width:0;width:100%}
+ .settings-form .form-grid{grid-template-columns:1fr}
+}
+@media(max-width:420px){.header-actions #exportBtn{display:none}.header-actions .btn{padding:8px}.setting-row{gap:8px}.setting-copy strong{font-size:12px}.setting-control{max-width:45%}}
+</style>
+</head>
+<body data-theme="light">
+<section class="auth-wrap" id="authScreen">
+  <div class="auth-card">
+    <div class="brand">fin<span>ora.</span></div>
+    <div class="subtitle">Your personal finance, made simple.</div>
+    <div class="auth-tabs">
+      <button id="loginTab" class="active" type="button">Login</button>
+      <button id="registerTab" type="button">Register</button>
+    </div>
+    <form id="authForm">
+      <div class="field hidden" id="nameField"><label for="authName">Full name</label><input id="authName" autocomplete="name" maxlength="80"></div>
+      <div class="field"><label for="authEmail">Email address</label><input id="authEmail" type="email" autocomplete="email" required></div>
+      <div class="field"><label for="authPassword">Password</label><input id="authPassword" type="password" minlength="8" maxlength="128" autocomplete="current-password" required></div>
+      <button class="btn full" id="authSubmit" type="submit">Login</button>
+      <p class="error" id="authMessage" role="<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Finora | Personal Finance</title>
+<link rel="stylesheet" href="css/style.css">
+
+</head>
+<body data-theme="light">
+<section class="auth-wrap" id="authScreen">
+  <div class="auth-card">
+    <div class="brand">fin<span>ora.</span></div>
+    <div class="subtitle">Your personal finance, made simple.</div>
+    <div class="auth-tabs">
+      <button id="loginTab" class="active" type="button">Login</button>
+      <button id="registerTab" type="button">Register</button>
+    </div>
+    <form id="authForm">
+      <div class="field hidden" id="nameField"><label for="authName">Full name</label><input id="authName" autocomplete="name" maxlength="80"></div>
+      <div class="field"><label for="authEmail">Email address</label><input id="authEmail" type="email" autocomplete="email" required></div>
+      <div class="field"><label for="authPassword">Password</label><input id="authPassword" type="password" minlength="8" maxlength="128" autocomplete="current-password" required></div>
+      <button class="btn full" id="authSubmit" type="submit">Login</button>
+      <p class="error" id="authMessage" role="status"></p>
+    </form>
+    <div class="muted">Use your own account. Never share your password.</div>
+  </div>
+</section>
+
+<div class="app hidden" id="app">
+  <aside>
+    <div class="sidebar-brand">fin<span>ora.</span></div>
+    <nav>
+      <div class="nav-label">WORKSPACE</div>
+      <button class="nav active" data-target="overview" type="button">◫ Overview</button>
+      <button class="nav" data-target="incomePanel" type="button">＋ Add Income</button>
+      <button class="nav" data-target="expensePanel" type="button">＋ Add Expense</button>
+      <button class="nav" data-target="budgetPage" type="button">▦ Monthly Budget</button>
+      <button class="nav" data-target="chartPage" type="button">▥ Expense Chart</button>
+      <button class="nav" data-target="transactionsPage" type="button">▤ Transactions</button>
+      <div class="nav-label">PREFERENCES</div>
+      <button class="nav" data-target="settingsPage" type="button">⚙ Settings</button>
+    </nav>
+  </aside>
+  <main>
+    <header>
+      <div><h1 id="headerTitle">Finance Dashboard</h1><p id="hello">Manage your money in one place</p></div>
+      <div class="header-actions">
+        <button class="btn light" id="exportBtn" type="button">Export CSV</button>
+        <div class="avatar" id="avatar">U</div>
+        <button class="btn light" id="logoutBtn" type="button">Logout</button>
+      </div>
+    </header>
+    <div class="content">
+      <section class="page active" id="overview">
+        <section class="welcome">
+          <div><h2>Financial Overview 👋</h2><div class="muted">Your income, expenses and monthly budget.</div></div>
+          <div class="date-pill" id="today"></div>
+        </section>
+        <section class="stats">
+          <article class="card"><div class="stat-label">Total Income</div><div class="stat-value green-text" id="totalIncome">₹0.00</div><div class="stat-note">All recorded income</div></article>
+          <article class="card"><div class="stat-label">Total Expenses</div><div class="stat-value red-text" id="totalExpense">₹0.00</div><div class="stat-note">All recorded expenses</div></article>
+          <article class="card"><div class="stat-label">Available Balance</div><div class="stat-value purple-text" id="balance">₹0.00</div><div class="stat-note">Income minus expenses</div></article>
+          <article class="card"><div class="stat-label">This Month's Spending</div><div class="stat-value" id="monthlyExpense">₹0.00</div><div class="stat-note">Current calendar month</div></article>
+        </section>
+        <div class="columns">
+          <section class="panel" id="incomePanel">
+            <div class="panel-head"><div><h3>＋ Add Income</h3><p>Record money received</p></div></div>
+            <form id="incomeForm">
+              <div class="form-grid">
+                <div class="field"><label for="incomeTitle">Income name</label><input id="incomeTitle" maxlength="120" required placeholder="Monthly salary"></div>
+                <div class="field"><label for="incomeAmount">Amount</label><input id="incomeAmount" type="number" min="0.01" step="0.01" required placeholder="0.00"></div>
+                <div class="field"><label for="incomeCategory">Category</label><select id="incomeCategory"><option>Salary</option><option>Freelance</option><option>Business</option><option>Investment</option><option>Gift</option><option>Other</option></select></div>
+                <div class="field"><label for="incomeDate">Date</label><input id="incomeDate" type="date" required></div>
+              </div>
+              <div class="form-actions"><button class="btn green full" id="incomeSubmit">Save Income</button></div><p class="message" id="incomeMessage" role="status"></p>
+            </form>
+          </section>
+          <section class="panel" id="expensePanel">
+            <div class="panel-head"><div><h3>＋ Add Expense</h3><p>Record a purchase or payment</p></div></div>
+            <form id="expenseForm">
+              <div class="form-grid">
+                <div class="field"><label for="expenseTitle">Expense name</label><input id="expenseTitle" maxlength="120" required placeholder="Groceries"></div>
+                <div class="field"><label for="expenseAmount">Amount</label><input id="expenseAmount" type="number" min="0.01" step="0.01" required placeholder="0.00"></div>
+                <div class="field"><label for="expenseCategory">Category</label><select id="expenseCategory"><option>Food</option><option>Transport</option><option>Shopping</option><option>Bills</option><option>Education</option><option>Health</option><option>Entertainment</option><option>Other</option></select></div>
+                <div class="field"><label for="expenseDate">Date</label><input id="expenseDate" type="date" required></div>
+              </div>
+              <div class="form-actions"><button class="btn full" id="expenseSubmit">Save Expense</button></div><p class="message" id="expenseMessage" role="status"></p>
+            </form>
+          </section>
+        </div>
+      </section>
+
+      <section class="page" id="budgetPage">
+        <section class="panel" id="budgetPanel">
+          <div class="panel-head"><div><h3>Monthly Budget</h3><p>Set a spending limit for a selected month</p></div></div>
+          <form id="budgetForm">
+            <div class="form-grid">
+              <div class="field"><label for="budgetMonth">Month</label><input id="budgetMonth" type="month" required></div>
+              <div class="field"><label for="budgetAmount">Budget</label><input id="budgetAmount" type="number" min="0" step="0.01" required placeholder="e.g. 15000"></div>
+            </div>
+            <div class="form-actions"><button class="btn full" id="budgetSubmit">Save Monthly Budget</button></div><p class="message" id="budgetMessage" role="status"></p>
+          </form>
+          <div class="budget-progress"><div class="budget-bar" id="budgetBar"></div></div>
+          <div class="budget-numbers"><span id="budgetSpent">Spent: ₹0.00</span><span id="budgetRemaining">Remaining: ₹0.00</span></div>
+        </section>
+      </section>
+
+      <section class="page" id="chartPage">
+        <section class="panel" id="chartPanel">
+          <div class="panel-head"><div><h3>Expense Breakdown</h3><p>All recorded expenses by category</p></div><strong id="chartTotal">₹0.00</strong></div>
+          <div class="chart-list" id="chart"></div><div class="empty" id="chartEmpty">Add expenses to view your chart.</div>
+        </section>
+      </section>
+
+      <section class="page" id="transactionsPage">
+        <section class="panel" id="transactionsPanel">
+          <div class="panel-head"><div><h3>Transactions</h3><p>Income and expenses for your account</p></div>
+            <div class="toolbar"><input class="search" id="search" type="search" placeholder="Search...">
+              <select class="filter" id="filter"><option value="All">All categories</option><option>Food</option><option>Transport</option><option>Shopping</option><option>Bills</option><option>Education</option><option>Health</option><option>Entertainment</option><option>Salary</option><option>Freelance</option><option>Business</option><option>Investment</option><option>Gift</option><option>Other</option></select>
+            </div>
+          </div>
+          <div class="table-wrap"><table><thead><tr><th>Name</th><th>Type</th><th>Category</th><th>Date</th><th>Amount</th><th>Action</th></tr></thead><tbody id="transactionsList"></tbody></table></div>
+          <div class="empty" id="transactionsEmpty" hidden>No transactions found.</div>
+        </section>
+      </section>
+
+      <section class="page" id="settingsPage">
+        <section class="welcome"><div><h2>Settings ⚙</h2><div class="muted">Customize your Finora experience and account preferences.</div></div></section>
+        <div class="settings-grid">
+          <section class="settings-card">
+            <h3>Appearance</h3><p class="description">Personalize the look and feel of your dashboard.</p>
+            <div class="setting-row"><div class="setting-copy"><strong>Theme</strong><small>Choose light, dark, or follow your device.</small></div><div class="setting-control"><select id="themeSetting" aria-label="Theme"><option value="light">Light</option><option value="dark">Dark</option><option value="system">System</option></select></div></div>
+            <div class="setting-row"><div class="setting-copy"><strong>Accent color</strong><small>Change the primary interface color.</small></div><div class="setting-control"><input id="accentSetting" type="color" value="#625bf6" aria-label="Accent color"></div></div>
+            <div class="setting-row"><div class="setting-copy"><strong>Compact layout</strong><small>Use tighter spacing to fit more content.</small></div><input class="toggle" id="compactSetting" type="checkbox" aria-label="Compact layout"></div>
+          </section>
+          <section class="settings-card">
+            <h3>Language & Region</h3><p class="description">Choose the language and formats used by the dashboard.</p>
+            <div class="setting-row"><div class="setting-copy"><strong>Language</strong><small>Applies to supported dashboard labels.</small></div><div class="setting-control"><select id="languageSetting" aria-label="Language"><option value="en">English</option><option value="bn">বাংলা (Bengali)</option></select></div></div>
+            <div class="setting-row"><div class="setting-copy"><strong>Currency</strong><small>Used for amounts shown in the dashboard.</small></div><div class="setting-control"><select id="currencySetting" aria-label="Currency"><option value="INR">INR (₹)</option><option value="USD">USD ($)</option><option value="EUR">EUR (€)</option><option value="GBP">GBP (£)</option><option value="BDT">BDT (৳)</option></select></div></div>
+            <div class="setting-row"><div class="setting-copy"><strong>Date format</strong><small>Choose how dates are displayed.</small></div><div class="setting-control"><select id="dateFormatSetting" aria-label="Date format"><option value="local">Local format</option><option value="dmy">DD/MM/YYYY</option><option value="mdy">MM/DD/YYYY</option><option value="iso">YYYY-MM-DD</option></select></div></div>
+          </section>
+          <section class="settings-card">
+            <h3>Account</h3><p class="description">Review and update your account profile.</p>
+            <form id="profileForm" class="settings-form">
+              <div class="field"><label for="profileName">Full name</label><input id="profileName" type="text" maxlength="80" autocomplete="name" required></div>
+              <div class="field"><label for="profileEmail">Email address</label><input id="profileEmail" type="email" class="account-email" disabled></div>
+              <div class="settings-actions"><button class="btn" type="submit" id="profileSaveBtn">Save profile</button></div>
+              <p class="settings-status" id="profileMessage" role="status"></p>
+            </form>
+            <p class="settings-note">Profile saving requires the server endpoint <code>PUT /api/auth/profile</code>. If your current server does not support it, the page will show an error instead of pretending the change was saved.</p>
+          </section>
+          <section class="settings-card">
+            <h3>Security</h3><p class="description">Manage your password and active sign-in.</p>
+            <form id="passwordForm" class="settings-form">
+              <div class="field"><label for="currentPassword">Current password</label><input id="currentPassword" type="password" minlength="8" maxlength="128" autocomplete="current-password" required></div>
+              <div class="field"><label for="newPassword">New password</label><input id="newPassword" type="password" minlength="8" maxlength="128" autocomplete="new-password" required></div>
+              <div class="field"><label for="confirmPassword">Confirm new password</label><input id="confirmPassword" type="password" minlength="8" maxlength="128" autocomplete="new-password" required></div>
+              <div class="settings-actions"><button class="btn" type="submit" id="passwordSaveBtn">Change password</button><button class="btn light" type="button" id="securityLogoutBtn">Log out</button></div>
+              <p class="settings-status" id="passwordMessage" role="status"></p>
+            </form>
+            <p class="settings-note">Password change requires the server endpoint <code>POST /api/auth/change-password</code>. Do not enter your password if you do not trust the server you are running.</p>
+          </section>
+          <section class="settings-card">
+            <h3>Preferences & Data</h3><p class="description">Save your preferences or export your financial records.</p>
+            <div class="setting-row"><div class="setting-copy"><strong>Save settings</strong><small>Keep these preferences in this browser.</small></div><button class="btn" type="button" id="saveSettingsBtn">Save</button></div>
+            <div class="setting-row"><div class="setting-copy"><strong>Export your data</strong><small>Download your transactions as a CSV file.</small></div><button class="btn light" type="button" id="settingsExportBtn">Export CSV</button></div>
+            <div class="setting-row"><div class="setting-copy"><strong>Application</strong><small>Finora Personal Finance Dashboard · Version 1.0</small></div><span class="tag">Finora</span></div>
+            <p class="settings-status" id="settingsMessage" role="status"></p>
+          </section>
+          <section class="settings-card">
+            <h3>Session</h3><p class="description">Details about the account currently signed in on this browser.</p>
+            <div class="setting-row"><div class="setting-copy"><strong>Signed-in user</strong><small id="sessionName">Not signed in</small></div><span class="tag" id="sessionStatus">Active</span></div>
+            <div class="setting-row"><div class="setting-copy"><strong>Account email</strong><small id="sessionEmail">—</small></div></div>
+            <div class="settings-actions"><button class="btn light" type="button" id="sessionLogoutBtn">Log out of Finora</button></div>
+          </section>
+        </div>
+      </section>
+      <div class="footer">Finora · Personal Finance Dashboard</div>
+    </div>
+  </main>
+</div>
+
+<script src="js/app.js" defer></script>
+</body>
+</html>
+status"></p>
+    </form>
+    <div class="muted">Use your own account. Never share your password.</div>
+  </div>
+</section>
+
+<div class="app hidden" id="app">
+  <aside>
+    <div class="sidebar-brand">fin<span>ora.</span></div>
+    <nav>
+      <div class="nav-label">WORKSPACE</div>
+      <button class="nav active" data-target="overview" type="button">◫ Overview</button>
+      <button class="nav" data-target="incomePanel" type="button">＋ Add Income</button>
+      <button class="nav" data-target="expensePanel" type="button">＋ Add Expense</button>
+      <button class="nav" data-target="budgetPage" type="button">▦ Monthly Budget</button>
+      <button class="nav" data-target="chartPage" type="button">▥ Expense Chart</button>
+      <button class="nav" data-target="transactionsPage" type="button">▤ Transactions</button>
+      <div class="nav-label">PREFERENCES</div>
+      <button class="nav" data-target="settingsPage" type="button">⚙ Settings</button>
+    </nav>
+  </aside>
+  <main>
+    <header>
+      <div><h1 id="headerTitle">Finance Dashboard</h1><p id="hello">Manage your money in one place</p></div>
+      <div class="header-actions">
+        <button class="btn light" id="exportBtn" type="button">Export CSV</button>
+        <div class="avatar" id="avatar">U</div>
+        <button class="btn light" id="logoutBtn" type="button">Logout</button>
+      </div>
+    </header>
+    <div class="content">
+      <section class="page active" id="overview">
+        <section class="welcome">
+          <div><h2>Financial Overview 👋</h2><div class="muted">Your income, expenses and monthly budget.</div></div>
+          <div class="date-pill" id="today"></div>
+        </section>
+        <section class="stats">
+          <article class="card"><div class="stat-label">Total Income</div><div class="stat-value green-text" id="totalIncome">₹0.00</div><div class="stat-note">All recorded income</div></article>
+          <article class="card"><div class="stat-label">Total Expenses</div><div class="stat-value red-text" id="totalExpense">₹0.00</div><div class="stat-note">All recorded expenses</div></article>
+          <article class="card"><div class="stat-label">Available Balance</div><div class="stat-value purple-text" id="balance">₹0.00</div><div class="stat-note">Income minus expenses</div></article>
+          <article class="card"><div class="stat-label">This Month's Spending</div><div class="stat-value" id="monthlyExpense">₹0.00</div><div class="stat-note">Current calendar month</div></article>
+        </section>
+        <div class="columns">
+          <section class="panel" id="incomePanel">
+            <div class="panel-head"><div><h3>＋ Add Income</h3><p>Record money received</p></div></div>
+            <form id="incomeForm">
+              <div class="form-grid">
+                <div class="field"><label for="incomeTitle">Income name</label><input id="incomeTitle" maxlength="120" required placeholder="Monthly salary"></div>
+                <div class="field"><label for="incomeAmount">Amount</label><input id="incomeAmount" type="number" min="0.01" step="0.01" required placeholder="0.00"></div>
+                <div class="field"><label for="incomeCategory">Category</label><select id="incomeCategory"><option>Salary</option><option>Freelance</option><option>Business</option><option>Investment</option><option>Gift</option><option>Other</option></select></div>
+                <div class="field"><label for="incomeDate">Date</label><input id="incomeDate" type="date" required></div>
+              </div>
+              <div class="form-actions"><button class="btn green full" id="incomeSubmit">Save Income</button></div><p class="message" id="incomeMessage" role="status"></p>
+            </form>
+          </section>
+          <section class="panel" id="expensePanel">
+            <div class="panel-head"><div><h3>＋ Add Expense</h3><p>Record a purchase or payment</p></div></div>
+            <form id="expenseForm">
+              <div class="form-grid">
+                <div class="field"><label for="expenseTitle">Expense name</label><input id="expenseTitle" maxlength="120" required placeholder="Groceries"></div>
+                <div class="field"><label for="expenseAmount">Amount</label><input id="expenseAmount" type="number" min="0.01" step="0.01" required placeholder="0.00"></div>
+                <div class="field"><label for="expenseCategory">Category</label><select id="expenseCategory"><option>Food</option><option>Transport</option><option>Shopping</option><option>Bills</option><option>Education</option><option>Health</option><option>Entertainment</option><option>Other</option></select></div>
+                <div class="field"><label for="expenseDate">Date</label><input id="expenseDate" type="date" required></div>
+              </div>
+              <div class="form-actions"><button class="btn full" id="expenseSubmit">Save Expense</button></div><p class="message" id="expenseMessage" role="status"></p>
+            </form>
+          </section>
+        </div>
+      </section>
+
+      <section class="page" id="budgetPage">
+        <section class="panel" id="budgetPanel">
+          <div class="panel-head"><div><h3>Monthly Budget</h3><p>Set a spending limit for a selected month</p></div></div>
+          <form id="budgetForm">
+            <div class="form-grid">
+              <div class="field"><label for="budgetMonth">Month</label><input id="budgetMonth" type="month" required></div>
+              <div class="field"><label for="budgetAmount">Budget</label><input id="budgetAmount" type="number" min="0" step="0.01" required placeholder="e.g. 15000"></div>
+            </div>
+            <div class="form-actions"><button class="btn full" id="budgetSubmit">Save Monthly Budget</button></div><p class="message" id="budgetMessage" role="status"></p>
+          </form>
+          <div class="budget-progress"><div class="budget-bar" id="budgetBar"></div></div>
+          <div class="budget-numbers"><span id="budgetSpent">Spent: ₹0.00</span><span id="budgetRemaining">Remaining: ₹0.00</span></div>
+        </section>
+      </section>
+
+      <section class="page" id="chartPage">
+        <section class="panel" id="chartPanel">
+          <div class="panel-head"><div><h3>Expense Breakdown</h3><p>All recorded expenses by category</p></div><strong id="chartTotal">₹0.00</strong></div>
+          <div class="chart-list" id="chart"></div><div class="empty" id="chartEmpty">Add expenses to view your chart.</div>
+        </section>
+      </section>
+
+      <section class="page" id="transactionsPage">
+        <section class="panel" id="transactionsPanel">
+          <div class="panel-head"><div><h3>Transactions</h3><p>Income and expenses for your account</p></div>
+            <div class="toolbar"><input class="search" id="search" type="search" placeholder="Search...">
+              <select class="filter" id="filter"><option value="All">All categories</option><option>Food</option><option>Transport</option><option>Shopping</option><option>Bills</option><option>Education</option><option>Health</option><option>Entertainment</option><option>Salary</option><option>Freelance</option><option>Business</option><option>Investment</option><option>Gift</option><option>Other</option></select>
+            </div>
+          </div>
+          <div class="table-wrap"><table><thead><tr><th>Name</th><th>Type</th><th>Category</th><th>Date</th><th>Amount</th><th>Action</th></tr></thead><tbody id="transactionsList"></tbody></table></div>
+          <div class="empty" id="transactionsEmpty" hidden>No transactions found.</div>
+        </section>
+      </section>
+
+      <section class="page" id="settingsPage">
+        <section class="welcome"><div><h2>Settings ⚙</h2><div class="muted">Customize your Finora experience and account preferences.</div></div></section>
+        <div class="settings-grid">
+          <section class="settings-card">
+            <h3>Appearance</h3><p class="description">Personalize the look and feel of your dashboard.</p>
+            <div class="setting-row"><div class="setting-copy"><strong>Theme</strong><small>Choose light, dark, or follow your device.</small></div><div class="setting-control"><select id="themeSetting" aria-label="Theme"><option value="light">Light</option><option value="dark">Dark</option><option value="system">System</option></select></div></div>
+            <div class="setting-row"><div class="setting-copy"><strong>Accent color</strong><small>Change the primary interface color.</small></div><div class="setting-control"><input id="accentSetting" type="color" value="#625bf6" aria-label="Accent color"></div></div>
+            <div class="setting-row"><div class="setting-copy"><strong>Compact layout</strong><small>Use tighter spacing to fit more content.</small></div><input class="toggle" id="compactSetting" type="checkbox" aria-label="Compact layout"></div>
+          </section>
+          <section class="settings-card">
+            <h3>Language & Region</h3><p class="description">Choose the language and formats used by the dashboard.</p>
+            <div class="setting-row"><div class="setting-copy"><strong>Language</strong><small>Applies to supported dashboard labels.</small></div><div class="setting-control"><select id="languageSetting" aria-label="Language"><option value="en">English</option><option value="bn">বাংলা (Bengali)</option></select></div></div>
+            <div class="setting-row"><div class="setting-copy"><strong>Currency</strong><small>Used for amounts shown in the dashboard.</small></div><div class="setting-control"><select id="currencySetting" aria-label="Currency"><option value="INR">INR (₹)</option><option value="USD">USD ($)</option><option value="EUR">EUR (€)</option><option value="GBP">GBP (£)</option><option value="BDT">BDT (৳)</option></select></div></div>
+            <div class="setting-row"><div class="setting-copy"><strong>Date format</strong><small>Choose how dates are displayed.</small></div><div class="setting-control"><select id="dateFormatSetting" aria-label="Date format"><option value="local">Local format</option><option value="dmy">DD/MM/YYYY</option><option value="mdy">MM/DD/YYYY</option><option value="iso">YYYY-MM-DD</option></select></div></div>
+          </section>
+          <section class="settings-card">
+            <h3>Account</h3><p class="description">Review and update your account profile.</p>
+            <form id="profileForm" class="settings-form">
+              <div class="field"><label for="profileName">Full name</label><input id="profileName" type="text" maxlength="80" autocomplete="name" required></div>
+              <div class="field"><label for="profileEmail">Email address</label><input id="profileEmail" type="email" class="account-email" disabled></div>
+              <div class="settings-actions"><button class="btn" type="submit" id="profileSaveBtn">Save profile</button></div>
+              <p class="settings-status" id="profileMessage" role="status"></p>
+            </form>
+            <p class="settings-note">Profile saving requires the server endpoint <code>PUT /api/auth/profile</code>. If your current server does not support it, the page will show an error instead of pretending the change was saved.</p>
+          </section>
+          <section class="settings-card">
+            <h3>Security</h3><p class="description">Manage your password and active sign-in.</p>
+            <form id="passwordForm" class="settings-form">
+              <div class="field"><label for="currentPassword">Current password</label><input id="currentPassword" type="password" minlength="8" maxlength="128" autocomplete="current-password" required></div>
+              <div class="field"><label for="newPassword">New password</label><input id="newPassword" type="password" minlength="8" maxlength="128" autocomplete="new-password" required></div>
+              <div class="field"><label for="confirmPassword">Confirm new password</label><input id="confirmPassword" type="password" minlength="8" maxlength="128" autocomplete="new-password" required></div>
+              <div class="settings-actions"><button class="btn" type="submit" id="passwordSaveBtn">Change password</button><button class="btn light" type="button" id="securityLogoutBtn">Log out</button></div>
+              <p class="settings-status" id="passwordMessage" role="status"></p>
+            </form>
+            <p class="settings-note">Password change requires the server endpoint <code>POST /api/auth/change-password</code>. Do not enter your password if you do not trust the server you are running.</p>
+          </section>
+          <section class="settings-card">
+            <h3>Preferences & Data</h3><p class="description">Save your preferences or export your financial records.</p>
+            <div class="setting-row"><div class="setting-copy"><strong>Save settings</strong><small>Keep these preferences in this browser.</small></div><button class="btn" type="button" id="saveSettingsBtn">Save</button></div>
+            <div class="setting-row"><div class="setting-copy"><strong>Export your data</strong><small>Download your transactions as a CSV file.</small></div><button class="btn light" type="button" id="settingsExportBtn">Export CSV</button></div>
+            <div class="setting-row"><div class="setting-copy"><strong>Application</strong><small>Finora Personal Finance Dashboard · Version 1.0</small></div><span class="tag">Finora</span></div>
+            <p class="settings-status" id="settingsMessage" role="status"></p>
+          </section>
+          <section class="settings-card">
+            <h3>Session</h3><p class="description">Details about the account currently signed in on this browser.</p>
+            <div class="setting-row"><div class="setting-copy"><strong>Signed-in user</strong><small id="sessionName">Not signed in</small></div><span class="tag" id="sessionStatus">Active</span></div>
+            <div class="setting-row"><div class="setting-copy"><strong>Account email</strong><small id="sessionEmail">—</small></div></div>
+            <div class="settings-actions"><button class="btn light" type="button" id="sessionLogoutBtn">Log out of Finora</button></div>
+          </section>
+        </div>
+      </section>
+      <div class="footer">Finora · Personal Finance Dashboard</div>
+    </div>
+  </main>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+let mode = "login", currentUser = null, expenses = [], incomes = [];
+let budgetInfo = {budget:0,spent:0,remaining:0};
+const defaultSettings = {theme:"system",accent:"#625bf6",compact:false,language:"en",currency:"INR",dateFormat:"local"};
+let settings = {...defaultSettings};
+
+function readSettings(){
+  try { settings = {...defaultSettings,...JSON.parse(localStorage.getItem("finoraSettings") || "{}")}; }
+  catch { settings = {...defaultSettings}; }
+  applySettings();
+}
+function saveSettings(){
+  try { localStorage.setItem("finoraSettings",JSON.stringify(settings)); return true; }
+  catch { return false; }
+}
+function applySettings(){
+  const theme = settings.theme === "system"
+    ? (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark":"light")
+    : settings.theme;
+  document.body.dataset.theme = theme;
+  document.documentElement.style.setProperty("--primary",settings.accent || defaultSettings.accent);
+  document.body.classList.toggle("compact",!!settings.compact);
+  document.documentElement.lang = settings.language === "bn" ? "bn":"en";
+  if ($("themeSetting")) $("themeSetting").value = settings.theme;
+  if ($("accentSetting")) $("accentSetting").value = settings.accent;
+  if ($("compactSetting")) $("compactSetting").checked = !!settings.compact;
+  if ($("languageSetting")) $("languageSetting").value = settings.language;
+  if ($("currencySetting")) $("currencySetting").value = settings.currency;
+  if ($("dateFormatSetting")) $("dateFormatSetting").value = settings.dateFormat;
+  translateStaticLabels();
+  updateSummary(); renderChart(); renderTransactions();
+}
+const translations = {
+  en: {dashboard:"Finance Dashboard",manage:"Manage your money in one place",overview:"Financial Overview 👋",overviewSub:"Your income, expenses and monthly budget.",income:"Total Income",expense:"Total Expenses",balance:"Available Balance",monthly:"This Month's Spending",allIncome:"All recorded income",allExpenses:"All recorded expenses",currentMonth:"Current calendar month",addIncome:"＋ Add Income",addExpense:"＋ Add Expense",budget:"Monthly Budget",chart:"Expense Chart",transactions:"Transactions",settings:"Settings ⚙",settingsSub:"Customize your Finora experience and account preferences.",export:"Export CSV",logout:"Logout",theme:"Theme",language:"Language",currency:"Currency",date:"Date"},
+  bn: {dashboard:"ফাইন্যান্স ড্যাশবোর্ড",manage:"এক জায়গায় আপনার অর্থ পরিচালনা করুন",overview:"আর্থিক সারসংক্ষেপ 👋",overviewSub:"আপনার আয়, খরচ ও মাসিক বাজেট।",income:"মোট আয়",expense:"মোট খরচ",balance:"অবশিষ্ট ব্যালেন্স",monthly:"এই মাসের খরচ",allIncome:"নথিভুক্ত মোট আয়",allExpenses:"নথিভুক্ত মোট খরচ",currentMonth:"চলতি ক্যালেন্ডার মাস",addIncome:"＋ আয় যোগ করুন",addExpense:"＋ খরচ যোগ করুন",budget:"মাসিক বাজেট",chart:"খরচের চার্ট",transactions:"লেনদেন",settings:"সেটিংস ⚙",settingsSub:"Finora-র অভিজ্ঞতা ও অ্যাকাউন্ট পছন্দ কাস্টমাইজ করুন।",export:"CSV এক্সপোর্ট",logout:"লগআউট",theme:"থিম",language:"ভাষা",currency:"মুদ্রা",date:"তারিখ"}
+};
+function t(key){return (translations[settings.language]||translations.en)[key] || translations.en[key] || key;}
+function translateStaticLabels(){
+  $("headerTitle").textContent=t("dashboard");
+  if (!currentUser) $("hello").textContent=t("manage");
+  $("exportBtn").textContent=t("export");$("logoutBtn").textContent=t("logout");
+  document.querySelector('[data-target="overview"]').textContent="◫ "+(settings.language==="bn"?"সারসংক্ষেপ":"Overview");
+  document.querySelector('[data-target="incomePanel"]').textContent=t("addIncome");
+  document.querySelector('[data-target="expensePanel"]').textContent=t("addExpense");
+  document.querySelector('[data-target="budgetPage"]').textContent="▦ "+t("budget");
+  document.querySelector('[data-target="chartPage"]').textContent="▥ "+t("chart");
+  document.querySelector('[data-target="transactionsPage"]').textContent="▤ "+t("transactions");
+  document.querySelector('[data-target="settingsPage"]').textContent=t("settings");
+  document.querySelector("#overview .welcome h2").textContent=t("overview");
+  document.querySelector("#overview .welcome .muted").textContent=t("overviewSub");
+  const labels=document.querySelectorAll("#overview .stats .stat-label");
+  const notes=document.querySelectorAll("#overview .stats .stat-note");
+  [t("income"),t("expense"),t("balance"),t("monthly")].forEach((v,i)=>labels[i].textContent=v);
+  [t("allIncome"),t("allExpenses"),"Income minus expenses",t("currentMonth")].forEach((v,i)=>notes[i].textContent=v);
+  $("settingsPage").querySelector(".welcome h2").textContent=t("settings");
+  $("settingsPage").querySelector(".welcome .muted").textContent=t("settingsSub");
+}
+function money(n){
+  const currencies={INR:"INR",USD:"USD",EUR:"EUR",GBP:"GBP",BDT:"BDT"};
+  try{return new Intl.NumberFormat(settings.language==="bn"?"bn-BD":"en-IN",{style:"currency",currency:currencies[settings.currency]||"INR",minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(n||0));}
+  catch{return "₹"+Number(n||0).toFixed(2);}
+}
+function localDate(d=new Date()){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;}
+function currentMonth(){return localDate().slice(0,7);}
+function formatDate(date){
+  if(!date)return "—";
+  if(settings.dateFormat==="iso")return date;
+  const parts=date.split("-");
+  if(parts.length!==3)return date;
+  if(settings.dateFormat==="dmy")return `${parts[2]}/${parts[1]}/${parts[0]}`;
+  if(settings.dateFormat==="mdy")return `${parts[1]}/${parts[2]}/${parts[0]}`;
+  try{return new Date(date+"T12:00:00").toLocaleDateString(settings.language==="bn"?"bn-BD":"en-IN",{day:"numeric",month:"short",year:"numeric"});}
+  catch{return date;}
+}
+$("today").textContent=formatDate(localDate());
+$("incomeDate").value=localDate();$("expenseDate").value=localDate();$("budgetMonth").value=currentMonth();
+
+function setAuthMode(next){
+  mode=next;$("loginTab").classList.toggle("active",mode==="login");$("registerTab").classList.toggle("active",mode==="register");
+  $("nameField").classList.toggle("hidden",mode!=="register");$("authName").required=mode==="register";
+  $("authPassword").autocomplete=mode==="login"?"current-password":"new-password";
+  $("authSubmit").textContent=mode==="login"?"Login":"Create Account";$("authMessage").textContent="";
+}
+$("loginTab").addEventListener("click",()=>setAuthMode("login"));
+$("registerTab").addEventListener("click",()=>setAuthMode("register"));
+
+async function api(url,options={}){
+  const response=await fetch(url,{credentials:"same-origin",...options,headers:{...(options.body?{"Content-Type":"application/json"}:{}),...(options.headers||{})}});
+  if(!response.ok){
+    let message="Request failed.";
+    try{message=(await response.json()).error||message;}catch{}
+    if(response.status===401&&!url.startsWith("/api/auth/"))showAuth();
+    throw new Error(message);
+  }
+  if(response.status===204)return {};
+  return response.json();
+}
+function showAuth(){
+  $("authScreen").classList.remove("hidden");$("app").classList.add("hidden");currentUser=null;
+}
+function showApp(user){
+  currentUser=user;$("authScreen").classList.add("hidden");$("app").classList.remove("hidden");
+  $("hello").textContent=`Welcome, ${user.name}`;$("avatar").textContent=(user.name||"U").slice(0,1).toUpperCase();
+  populateProfile();loadAll();
+}
+function populateProfile(){
+  if(!currentUser)return;
+  $("profileName").value=currentUser.name||"";$("profileEmail").value=currentUser.email||"";
+  $("sessionName").textContent=currentUser.name||"Signed in";$("sessionEmail").textContent=currentUser.email||"—";
+  $("sessionStatus").textContent="Active";
+}
+$("authForm").addEventListener("submit",async event=>{
+  event.preventDefault();const button=$("authSubmit");button.disabled=true;$("authMessage").textContent="";
+  const payload={email:$("authEmail").value.trim(),password:$("authPassword").value};
+  if(mode==="register")payload.name=$("authName").value.trim();
+  try{const result=await api(`/api/auth/${mode}`,{method:"POST",body:JSON.stringify(payload)});$("authPassword").value="";showApp(result.user);}
+  catch(error){$("authMessage").textContent=error.message;}
+  finally{button.disabled=false;}
+});
+async function logout(){
+  try{await api("/api/auth/logout",{method:"POST"});}catch{}
+  setAuthMode("login");showAuth();
+}
+$("logoutBtn").addEventListener("click",logout);
+$("securityLogoutBtn").addEventListener("click",logout);
+$("sessionLogoutBtn").addEventListener("click",logout);
+
+async function loadBudget(){
+  const month=$("budgetMonth").value||currentMonth();
+  try{
+    budgetInfo=await api("/api/budget/"+encodeURIComponent(month));
+    $("budgetAmount").value=budgetInfo.budget||"";
+    $("budgetSpent").textContent=(settings.language==="bn"?"খরচ: ":"Spent: ")+money(budgetInfo.spent);
+    $("budgetRemaining").textContent=(settings.language==="bn"?"অবশিষ্ট: ":"Remaining: ")+money(budgetInfo.remaining);
+    const pct=budgetInfo.budget>0?budgetInfo.spent/budgetInfo.budget*100:0;
+    $("budgetBar").style.width=Math.min(pct,100)+"%";$("budgetBar").classList.toggle("over",pct>100);
+  }catch(error){$("budgetMessage").textContent=error.message;}
+}
+function updateSummary(){
+  if(!$("totalIncome"))return;
+  const totalIncome=incomes.reduce((s,x)=>s+Number(x.amount),0);
+  const totalExpense=expenses.reduce((s,x)=>s+Number(x.amount),0),now=new Date();
+  const monthly=expenses.reduce((sum,item)=>{
+    if(!item.date)return sum;const d=new Date(item.date+"T12:00:00");
+    return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear()?sum+Number(item.amount):sum;
+  },0);
+  $("totalIncome").textContent=money(totalIncome);$("totalExpense").textContent=money(totalExpense);
+  $("balance").textContent=money(totalIncome-totalExpense);
+  $("balance").className="stat-value "+(totalIncome-totalExpense<0?"red-text":"purple-text");
+  $("monthlyExpense").textContent=money(monthly);$("chartTotal").textContent=money(totalExpense);
+}
+function renderChart(){
+  if(!$("chart"))return;
+  const totals={};expenses.forEach(item=>{const category=item.category||"Other";totals[category]=(totals[category]||0)+Number(item.amount);});
+  const entries=Object.entries(totals).sort((a,b)=>b[1]-a[1]);$("chart").replaceChildren();$("chartEmpty").hidden=entries.length>0;
+  const max=Math.max(1,...entries.map(x=>x[1]));
+  entries.forEach(([category,amount])=>{
+    const row=document.createElement("div");row.className="chart-row";
+    const name=document.createElement("div");name.className="chart-name";name.textContent=category;
+    const track=document.createElement("div");track.className="track";const bar=document.createElement("div");bar.className="bar";bar.style.width=(amount/max*100)+"%";track.appendChild(bar);
+    const value=document.createElement("div");value.className="chart-amount";value.textContent=money(amount);
+    row.append(name,track,value);$("chart").appendChild(row);
+  });
+}
+function allTransactions(){
+  return [...expenses.map(x=>({...x,type:"Expense"})),...incomes.map(x=>({...x,type:"Income"}))]
+    .sort((a,b)=>String(b.date||"").localeCompare(String(a.date||""))||b.id-a.id);
+}
+function renderTransactions(){
+  if(!$("transactionsList"))return;
+  const query=$("search").value.trim().toLowerCase(),category=$("filter").value;
+  const rows=allTransactions().filter(x=>(String(x.title).toLowerCase().includes(query)||String(x.category).toLowerCase().includes(query))&&(category==="All"||x.category===category));
+  const tbody=$("transactionsList");tbody.replaceChildren();$("transactionsEmpty").hidden=rows.length>0;
+  rows.forEach(item=>{
+    const tr=document.createElement("tr");
+    function cell(text,cls=""){const td=document.createElement("td");td.textContent=text;if(cls)td.className=cls;return td;}
+    tr.appendChild(cell(item.title));tr.appendChild(cell(item.type,item.type==="Income"?"green-text":"red-text"));
+    const cat=document.createElement("td"),tag=document.createElement("span");tag.className="tag";tag.textContent=item.category||"Other";cat.appendChild(tag);tr.appendChild(cat);
+    tr.appendChild(cell(formatDate(item.date||"—")));
+    tr.appendChild(cell((item.type==="Income"?"+":"−")+money(item.amount),item.type==="Income"?"green-text":"red-text"));
+    const action=document.createElement("td"),btn=document.createElement("button");btn.className="delete";btn.textContent="Delete";btn.type="button";
+    btn.addEventListener("click",async()=>{
+      if(!confirm(`Delete this ${item.type.toLowerCase()}?`))return;
+      try{await api((item.type==="Income"?"/api/income/":"/api/expenses/")+encodeURIComponent(item.id),{method:"DELETE"});await loadAll();}
+      catch(error){alert(error.message);}
+    });
+    action.appendChild(btn);tr.appendChild(action);tbody.appendChild(tr);
+  });
+}
+async function loadAll(){
+  try{
+    const [expenseData,incomeData]=await Promise.all([api("/api/expenses"),api("/api/income")]);
+    expenses=expenseData;incomes=incomeData;updateSummary();renderChart();renderTransactions();await loadBudget();
+  }catch(error){console.error(error);}
+}
+function setupTransactionForm(config){
+  $(config.form).addEventListener("submit",async event=>{
+    event.preventDefault();const message=$(config.message);message.textContent="";
+    const payload={title:$(config.title).value.trim(),amount:Number($(config.amount).value),category:$(config.category).value,date:$(config.date).value};
+    if(!payload.title||!Number.isFinite(payload.amount)||payload.amount<=0||!payload.date){message.textContent="Enter a valid name, amount and date.";return;}
+    const button=$(config.button);button.disabled=true;
+    try{
+      await api(config.endpoint,{method:"POST",body:JSON.stringify(payload)});
+      $(config.form).reset();$(config.date).value=localDate();await loadAll();
+      message.className="message success";message.textContent="Saved successfully!";
+    }catch(error){message.className="message";message.textContent=error.message;}
+    finally{button.disabled=false;}
+  });
+}
+setupTransactionForm({form:"incomeForm",title:"incomeTitle",amount:"incomeAmount",category:"incomeCategory",date:"incomeDate",button:"incomeSubmit",message:"incomeMessage",endpoint:"/api/income"});
+setupTransactionForm({form:"expenseForm",title:"expenseTitle",amount:"expenseAmount",category:"expenseCategory",date:"expenseDate",button:"expenseSubmit",message:"expenseMessage",endpoint:"/api/expenses"});
+$("budgetMonth").addEventListener("change",loadBudget);
+$("budgetForm").addEventListener("submit",async event=>{
+  event.preventDefault();const month=$("budgetMonth").value,amount=Number($("budgetAmount").value);$("budgetMessage").textContent="";
+  if(!month||!Number.isFinite(amount)||amount<0){$("budgetMessage").textContent="Enter a valid month and budget.";return;}
+  const button=$("budgetSubmit");button.disabled=true;
+  try{await api("/api/budget/"+encodeURIComponent(month),{method:"PUT",body:JSON.stringify({amount})});await loadBudget();$("budgetMessage").className="message success";$("budgetMessage").textContent="Budget saved successfully!";}
+  catch(error){$("budgetMessage").className="message";$("budgetMessage").textContent=error.message;}
+  finally{button.disabled=false;}
+});
+$("search").addEventListener("input",renderTransactions);$("filter").addEventListener("change",renderTransactions);
+function exportCsv(){window.location.href="/api/export.csv";}
+$("exportBtn").addEventListener("click",exportCsv);$("settingsExportBtn").addEventListener("click",exportCsv);
+
+document.querySelectorAll(".nav[data-target]").forEach(button=>{
+  button.addEventListener("click",()=>{
+    const target=button.dataset.target;
+    const pageId=target==="incomePanel"||target==="expensePanel"?"overview":target;
+    document.querySelectorAll(".page").forEach(page=>page.classList.toggle("active",page.id===pageId));
+    document.querySelectorAll(".nav").forEach(nav=>nav.classList.toggle("active",nav===button));
+    const destination=document.getElementById(target==="incomePanel"||target==="expensePanel"?target:pageId);
+    if(destination)destination.scrollIntoView({behavior:"smooth",block:"start"});
+    const titleMap={overview:t("dashboard"),budgetPage:t("budget"),chartPage:t("chart"),transactionsPage:t("transactions"),settingsPage:t("settings"),incomePanel:t("addIncome"),expensePanel:t("addExpense")};
+    $("headerTitle").textContent=titleMap[target]||t("dashboard");
+  });
+});
+
+["themeSetting","accentSetting","compactSetting","languageSetting","currencySetting","dateFormatSetting"].forEach(id=>{
+  $(id).addEventListener("change",()=>{
+    settings.theme=$("themeSetting").value;settings.accent=$("accentSetting").value;
+    settings.compact=$("compactSetting").checked;settings.language=$("languageSetting").value;
+    settings.currency=$("currencySetting").value;settings.dateFormat=$("dateFormatSetting").value;
+    applySettings();
+    $("today").textContent=formatDate(localDate());
+    $("settingsMessage").className="settings-status";
+    $("settingsMessage").textContent="Preview updated. Click Save to keep these settings.";
+  });
+});
+$("saveSettingsBtn").addEventListener("click",()=>{
+  settings.theme=$("themeSetting").value;settings.accent=$("accentSetting").value;
+  settings.compact=$("compactSetting").checked;settings.language=$("languageSetting").value;
+  settings.currency=$("currencySetting").value;settings.dateFormat=$("dateFormatSetting").value;
+  applySettings();
+  const saved=saveSettings();$("settingsMessage").className="settings-status "+(saved?"success":"");
+  $("settingsMessage").textContent=saved?"Settings saved in this browser.":"Could not save settings in this browser.";
+});
+$("profileForm").addEventListener("submit",async event=>{
+  event.preventDefault();const message=$("profileMessage"),button=$("profileSaveBtn");message.textContent="";
+  const name=$("profileName").value.trim();if(!name){message.textContent="Name is required.";return;}
+  button.disabled=true;
+  try{
+    const result=await api("/api/auth/profile",{method:"PUT",body:JSON.stringify({name})});
+    currentUser=result.user||{...currentUser,name};populateProfile();
+    $("hello").textContent=`Welcome, ${currentUser.name}`;$("avatar").textContent=currentUser.name.slice(0,1).toUpperCase();
+    message.className="settings-status success";message.textContent="Profile updated successfully.";
+  }catch(error){message.className="settings-status";message.textContent=error.message;}
+  finally{button.disabled=false;}
+});
+$("passwordForm").addEventListener("submit",async event=>{
+  event.preventDefault();const message=$("passwordMessage"),button=$("passwordSaveBtn");
+  const currentPassword=$("currentPassword").value,newPassword=$("newPassword").value,confirmPassword=$("confirmPassword").value;
+  message.className="settings-status";message.textContent="";
+  if(newPassword.length<8){message.textContent="New password must be at least 8 characters.";return;}
+  if(newPassword!==confirmPassword){message.textContent="New passwords do not match.";return;}
+  if(currentPassword===newPassword){message.textContent="Choose a different new password.";return;}
+  button.disabled=true;
+  try{
+    await api("/api/auth/change-password",{method:"POST",body:JSON.stringify({currentPassword,newPassword})});
+    $("passwordForm").reset();message.className="settings-status success";message.textContent="Password changed successfully.";
+  }catch(error){message.textContent=error.message;}
+  finally{button.disabled=false;}
+});
+
+readSettings();
+if(window.matchMedia){
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",()=>{
+    if(settings.theme==="system")applySettings();
+  });
+}
+(async function start(){
+  try{const result=await api("/api/auth/me");showApp(result.user);}
+  catch{showAuth();}
+})();
+</script>
+</body>
+</html>
