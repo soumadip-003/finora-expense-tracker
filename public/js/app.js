@@ -267,6 +267,8 @@ $("loginTab").addEventListener("click", () => setAuthMode("login"));
 $("registerTab").addEventListener("click", () => setAuthMode("register"));
 
 async function api(url, options = {}) {
+    // console.log(url)
+    
     const response = await fetch(url, {
         credentials: "same-origin",
         ...options,
